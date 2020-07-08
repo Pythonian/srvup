@@ -1,12 +1,8 @@
-
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, Http404, HttpResponseRedirect, get_object_or_404
 
-# Create your views here.
-
 from notifications.signals import notify
-
 from videos.models import Video
 
 from .models import Comment
@@ -24,7 +20,6 @@ def comment_thread(request, id):
 	return render(request, "comments/comment_thread.html", context)
 
 
-
 def comment_create_view(request):
 	if request.method == "POST" and request.user.is_authenticated():
 		parent_id = request.POST.get('parent_id')
@@ -35,7 +30,6 @@ def comment_create_view(request):
 		except:
 			video = None
 
-		print video
 		parent_comment = None
 		if parent_id is not None:
 			try:
@@ -56,8 +50,7 @@ def comment_create_view(request):
 					path=parent_comment.get_origin, 
 					text=comment_text,
 					video = video,
-					parent=parent_comment
-					)
+					parent=parent_comment)
 				affected_users = parent_comment.get_affected_users()
 				notify.send(
 						request.user, 
@@ -75,20 +68,10 @@ def comment_create_view(request):
 					text=comment_text,
 					video = video
 					)
-				# option to send to super user or staff users
-				# notify.send(
-				# 		request.user, 
-				# 		recipient = request.user, 
-				# 		action=new_comment, 
-				# 		target = new_comment.video,
-				# 		verb='commented on')
-				#notify.send(request.user, recipient=request.user, action='New comment added')
 				messages.success(request, "Thank you for the comment.")
 				return HttpResponseRedirect(new_comment.get_absolute_url())
 		else:
-			print origin_path
 			messages.error(request, "There was an error with your comment.")
 			return HttpResponseRedirect(origin_path)
-
 	else:
 		raise Http404

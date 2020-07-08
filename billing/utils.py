@@ -10,8 +10,6 @@ braintree.Configuration.configure(braintree.Environment.Sandbox,
                                   public_key=settings.BRAINTREE_PUBLIC_KEY,
                                   private_key=settings.BRAINTREE_PRIVATE_KEY)
 
-
-
 from .signals import membership_dates_update
 
 
@@ -45,11 +43,3 @@ def update_braintree_membership(user):
 		membership.update_status()
 	else:
 		pass
-
-
-
-
-
-
-
-

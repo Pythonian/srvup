@@ -42,8 +42,6 @@ class RegisterForm(forms.Form):
     		raise forms.ValidationError("There was an error, please try again or contact us.")
 
 
-
-
 class UserCreationForm(forms.ModelForm):
     """A form for creating new users. Includes all the required
     fields, plus a repeated password."""
@@ -92,6 +90,3 @@ class UserChangeForm(forms.ModelForm):
 class LoginForm(forms.Form):
 	username = forms.CharField(label="Username")
 	password = forms.CharField(widget=forms.PasswordInput())
-
-
-

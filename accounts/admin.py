@@ -6,6 +6,7 @@ from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from .models import MyUser, UserProfile
 from .forms import UserChangeForm, UserCreationForm
 
+
 class MyUserAdmin(UserAdmin):
     # The forms to add and change user instances
     form = UserChangeForm

@@ -1,5 +1,3 @@
-
-
 def get_vid_for_direction(instance, direction):
 	''' get next video instance based on direction and current video instance'''
 	category = instance.category
@@ -15,5 +13,3 @@ def get_vid_for_direction(instance, direction):
 		except IndexError:
 			next_vid = None
 	return next_vid
-
-	

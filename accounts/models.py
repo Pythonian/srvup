@@ -5,7 +5,6 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.utils import timezone
 
-
 import braintree
 
 braintree.Configuration.configure(braintree.Environment.Sandbox,
@@ -13,11 +12,9 @@ braintree.Configuration.configure(braintree.Environment.Sandbox,
                                   public_key=settings.BRAINTREE_PUBLIC_KEY,
                                   private_key=settings.BRAINTREE_PRIVATE_KEY)
 
-
-
-
 from billing.models import Membership, UserMerchantId
 from notifications.signals import notify
+
 
 class MyUserManager(BaseUserManager):
     def create_user(self, username=None, email=None, password=None):
@@ -85,11 +82,9 @@ class MyUser(AbstractBaseUser):
 	REQUIRED_FIELDS = ['email']
 
 	def get_full_name(self):
-	    # The user is identified by their email address
-	    return "%s %s" %(self.first_name, self.last_name)
+	    return f"{self.first_name} {self.last_name}"
 
 	def get_short_name(self):
-	    # The user is identified by their email address
 	    return self.first_name
 
 	def __unicode__(self):
@@ -112,9 +107,6 @@ class MyUser(AbstractBaseUser):
 	    return self.is_admin
 
 
-
-
-
 def user_logged_in_signal(sender, signal, request, user, **kwargs):
 	request.session.set_expiry(60000)
 	membership_obj, created = Membership.objects.get_or_create(user=user)
@@ -129,10 +121,8 @@ def user_logged_in_signal(sender, signal, request, user, **kwargs):
 user_logged_in.connect(user_logged_in_signal)
 
 
-
-
 class UserProfile(models.Model):
-	user = models.OneToOneField(MyUser)
+	user = models.OneToOneField(MyUser, on_delete=models.CASCADE)
 	bio = models.TextField(null=True, blank=True)
 	facebook_link = models.CharField(max_length=320, 
 		null=True, 
@@ -144,19 +134,16 @@ class UserProfile(models.Model):
 		verbose_name='Twitter handle')		
 
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.user.username
-
 
 
 def new_user_receiver(sender, instance, created, *args, **kwargs):
 	if created:
 		new_profile, is_created = UserProfile.objects.get_or_create(user=instance)
-		#print new_profile, is_created
 		notify.send(instance, 
-					recipient=MyUser.objects.get(username='jmitchel3'), #admin user
+					recipient=MyUser.objects.get(username='seyi'), #admin user
 					verb='New user created.')
-		# merchant account customer id -- stripe vs braintree
 	try:
 		merchant_obj = UserMerchantId.objects.get(user=instance)
 	except:
@@ -167,14 +154,10 @@ def new_user_receiver(sender, instance, created, *args, **kwargs):
 			merchant_obj, created = UserMerchantId.objects.get_or_create(user=instance)
 			merchant_obj.customer_id = new_customer_result.customer.id
 			merchant_obj.save()
-			print """Customer created with id = {0}""".format(new_customer_result.customer.id)
+			print(f"Customer created with id = {new_customer_result.customer.id}")
 		else:
-			print "Error: {0}".format(new_customer_result.message)
-			messages.error(request, "There was an error with your account. Please contact us.")
-
-		
+			print(f"Error: {new_customer_result.message}")
+			messages.error(request, "There was an error with your account. Please contact us.")		
 		# send email for verifying user email
 
 post_save.connect(new_user_receiver, sender=MyUser)
-
-

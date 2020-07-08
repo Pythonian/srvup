@@ -1,25 +1,9 @@
-"""
-Django settings for srvup project.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/1.7/topics/settings/
-
-For the full list of settings and their values, see
-https://docs.djangoproject.com/en/1.7/ref/settings/
-"""
-
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '6j6^%gd-su1^j7qmp&4g-gm$_nvs2hx(og&ovlj#1)+@09@p87'
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 TEMPLATE_DEBUG = True
@@ -31,7 +15,6 @@ LOGIN_URL = "/login/"
 
 AUTH_USER_MODEL = 'accounts.MyUser'
 RECENT_COMMENT_NUMBER = 10
-# Application definition
 
 INSTALLED_APPS = (
     'django.contrib.admin',
@@ -51,27 +34,32 @@ INSTALLED_APPS = (
 
 CRISPY_TEMPLATE_PACK = "bootstrap3"
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-)
+]
 
-
-TEMPLATE_CONTEXT_PROCESSORS =(
-    "django.contrib.auth.context_processors.auth",
-    "django.core.context_processors.debug",
-    "django.core.context_processors.i18n",
-    "django.core.context_processors.media",
-    "django.core.context_processors.request",
-    "django.core.context_processors.static",
-    "django.core.context_processors.tz",
-    "django.contrib.messages.context_processors.messages"
-)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
 
 ROOT_URLCONF = 'srvup.urls'
 
@@ -107,33 +95,16 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-STATICFILES_DIRS = (
-    os.path.join(os.path.dirname(BASE_DIR), "static", "static_dirs"),
-    #'/Users/jmitch/Desktop/srvup/static/static_dirs/', #on mac
-    #'\Users\jmitch\Desktop\srvup\static\static_dirs\', somethingl ike this on windows
-    #'/var/www/static/',
-)
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'assets'),
+]
 
-STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), "static", "static_root")
-
-TEMPLATE_DIRS = (
-    os.path.join(BASE_DIR, "templates"),
-)
-
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), "static", "media")
-
-
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 #braintree info
 BRAINTREE_MERCHANT_ID ="3j27nwdw8mbvk68y"
 BRAINTREE_PUBLIC_KEY = "64zrsxstnhykn4v2"
 BRAINTREE_PRIVATE_KEY = "5507587264ea632357cad014f69ed78f"
-
-
-
-
-
-
-

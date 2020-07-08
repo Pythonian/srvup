@@ -1,10 +1,9 @@
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db import models
 from django.template.defaultfilters import truncatechars
 from django.utils.text import Truncator
 
-# Create your models here.
 from accounts.models import MyUser
 from videos.models import Video
 
@@ -40,13 +39,13 @@ class CommentManager(models.Manager):
 
 
 class Comment(models.Model):
-	user = models.ForeignKey(MyUser)
-	parent = models.ForeignKey("self", null=True, blank=True)
+	user = models.ForeignKey(MyUser, on_delete=models.CASCADE)
+	parent = models.ForeignKey("self", null=True, blank=True, on_delete=models.CASCADE)
 	path = models.CharField(max_length=350)
-	video = models.ForeignKey(Video, null=True, blank=True)
+	video = models.ForeignKey(Video, null=True, blank=True, on_delete=models.CASCADE)
 	text = models.TextField()
-	updated = models.DateTimeField(auto_now=True, auto_now_add=False)
-	timestamp = models.DateTimeField(auto_now=False, auto_now_add=True)
+	updated = models.DateTimeField(auto_now=True)
+	timestamp = models.DateTimeField(auto_now_add=True)
 	active = models.BooleanField(default=True)
 
 	objects = CommentManager()
@@ -54,9 +53,8 @@ class Comment(models.Model):
 	class Meta:
 		ordering = ['-timestamp']
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.text
-
 
 	def get_absolute_url(self):
 		return reverse('comment_thread', kwargs={"id": self.id})
@@ -67,7 +65,6 @@ class Comment(models.Model):
 
 	@property
 	def get_preview(self):
-		#return truncatechars(self.text, 120)
 		return Truncator(self.text).chars(120)
 
 	@property
@@ -102,19 +99,3 @@ class Comment(models.Model):
 					users.append(comment.user)
 			return users
 		return None
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

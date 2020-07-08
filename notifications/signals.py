@@ -1,11 +1,8 @@
 from django.dispatch import Signal
 
-
 notify = Signal(providing_args=['recipient', 'verb', 'action', 'target', 'affected_users'])
 
-
 """
-
 sender_content_type = models.ForeignKey(ContentType, related_name='nofity_sender')
 sender_object_id = models.PositiveIntegerField()
 sender_object = GenericForeignKey("sender_content_type", "sender_object_id")

@@ -22,7 +22,6 @@ braintree.Configuration.configure(braintree.Environment.Sandbox,
 PLAN_ID = "monthly_plan"
 
 
-
 def get_or_create_model_transaction(user, braintree_transaction):
 	trans_id = braintree_transaction.id
 	try:
@@ -47,8 +46,7 @@ def get_or_create_model_transaction(user, braintree_transaction):
 
 def update_transactions(user):
 	bt_transactions = braintree.Transaction.search(
-				braintree.TransactionSearch.customer_id == user.usermerchantid.customer_id
-			)
+				braintree.TransactionSearch.customer_id == user.usermerchantid.customer_id)
 	try:
 		django_transactions = user.transaction_set.all()
 	except:
@@ -61,7 +59,6 @@ def update_transactions(user):
 			for bt_tran in bt_transactions.items:
 				new_tran, created = get_or_create_model_transaction(user, bt_tran)
 
-				
 
 @login_required
 def cancel_subscription(request):
@@ -79,13 +76,11 @@ def cancel_subscription(request):
 	return redirect("billing_history")
 
 
-
 @login_required
 def billing_history(request):
 	update_transactions(request.user)
 	history = Transaction.objects.filter(user=request.user).filter(success=True)
 	return render(request, "billing/history.html", {"queryset": history})
-
 
 
 @login_required
@@ -97,11 +92,9 @@ def upgrade(request):
 			messages.error(request, "There was an error with your account. Please contact us.")
 			return redirect("contact_us")
 		merchant_customer_id = merchant_obj.customer_id
-		print merchant_customer_id
 		client_token = braintree.ClientToken.generate({
 				"customer_id": merchant_customer_id
 			})
-		#print client_token
 		if request.method == "POST":
 			nonce = request.POST.get("payment_method_nonce", None)
 			if nonce is None:
@@ -180,6 +173,3 @@ def upgrade(request):
 		context =  {"client_token":client_token}
 
 		return render(request, "billing/upgrade.html",context)
-
-
-

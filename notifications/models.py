@@ -1,12 +1,11 @@
-
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db import models
 
 from .signals import notify
-# Create your models here.
+
 
 class NotificationQuerySet(models.query.QuerySet):
 	def get_user(self, recipient):
@@ -55,30 +54,25 @@ class NotificationManager(models.Manager):
 
 
 class Notification(models.Model):
-	sender_content_type = models.ForeignKey(ContentType, related_name='nofity_sender')
+	sender_content_type = models.ForeignKey(ContentType, related_name='nofity_sender', on_delete=models.CASCADE)
 	sender_object_id = models.PositiveIntegerField()
-	sender_object = GenericForeignKey("sender_content_type", "sender_object_id")
-	
+	sender_object = GenericForeignKey("sender_content_type", "sender_object_id")	
 	verb = models.CharField(max_length=255)
-
 	action_content_type = models.ForeignKey(ContentType, related_name='notify_action', 
-		null=True, blank=True)
+		null=True, blank=True, on_delete=models.CASCADE)
 	action_object_id = models.PositiveIntegerField(null=True, blank=True)
 	action_object = GenericForeignKey("action_content_type", "action_object_id")
-
 	target_content_type = models.ForeignKey(ContentType, related_name='notify_target', 
-		null=True, blank=True)
+		null=True, blank=True, on_delete=models.CASCADE)
 	target_object_id = models.PositiveIntegerField(null=True, blank=True)
 	target_object = GenericForeignKey("target_content_type", "target_object_id")
-
-	recipient = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='notifications')
+	recipient = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='notifications', on_delete=models.CASCADE)
 	read = models.BooleanField(default=False)
 	timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
 
 	objects = NotificationManager()
 
-
-	def __unicode__(self):
+	def __str__(self):
 		try:
 			target_url = self.target_object.get_absolute_url()
 		except:
@@ -120,25 +114,16 @@ class Notification(models.Model):
 			return "<a href='%(verify_read)s?next=%(target_url)s'>%(sender)s %(verb)s</a>" %context
 
 
-
 def new_notification(sender, **kwargs):
 	kwargs.pop('signal', None)
 	recipient = kwargs.pop("recipient")
 	verb = kwargs.pop("verb")
-	#verb = kwargs["verb"]
 	affected_users = kwargs.pop('affected_users', None)
-	#print "affected users are"
-	#print affected_users
-	#print sender
-
-	#target = kwargs.pop("target", None)
-	#action = kwargs.pop("action", None)
 	if affected_users is not None:
 		for u in affected_users:
 			if u == sender:
 				pass
 			else:
-				print u
 				new_note = Notification(
 					recipient=u,
 					verb = verb, # smart_text
@@ -146,7 +131,6 @@ def new_notification(sender, **kwargs):
 					sender_object_id = sender.id,
 					)
 				for option in ("target", "action"):
-					#obj = kwargs.pop(option, None)
 					try:
 						obj = kwargs[option]
 						if obj is not None:
@@ -155,7 +139,6 @@ def new_notification(sender, **kwargs):
 					except:
 						pass
 				new_note.save()
-				print new_note
 	else:
 		new_note = Notification(
 			recipient=recipient,
@@ -169,26 +152,5 @@ def new_notification(sender, **kwargs):
 				setattr(new_note, "%s_content_type" %option, ContentType.objects.get_for_model(obj))
 				setattr(new_note, "%s_object_id" %option, obj.id)
 		new_note.save()
-		#print new_note
-
 
 notify.connect(new_notification)
-
-# justin  (AUTH_USER_MODEL)
-# has commented ("verb")
-# with a Comment (id=32) (instance action_object)
-# on your Comment (id=12) (targeted instance)
-# so now you should know about it (AUTH_USER_MODEL)
-
-# <instance of a user>
-# <something> #verb to 
-# <instance of a model> #to
-# <instance of a model> #tell
-# <instance of a user>
-
-
-
-
-
-
-
